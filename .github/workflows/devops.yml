@@ -28,10 +28,10 @@ jobs:
       - name: Ensure LocalStack ECR Repo
         run: |
           aws --endpoint-url $env:LOCALSTACK_ENDPOINT `
-              ecr create-repository `
-              --repository-name mashroom-app `
-              --image-scanning-configuration scanOnPush=true
-        shell: powershell
+          ecr create-repository `
+          --repository-name mashroom-app `
+          --image-scanning-configuration scanOnPush=true `
+          || Write-Host "Repository already exists, continuing..."
 
       # 4️⃣ Tag Docker image for LocalStack ECR
       - name: Tag Image for LocalStack ECR
