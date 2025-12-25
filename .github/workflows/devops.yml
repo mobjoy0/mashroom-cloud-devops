@@ -38,6 +38,10 @@ jobs:
           docker push 000000000000.dkr.ecr.us-east-1.localhost.localstack.cloud:4566/mashroom-app
         shell: powershell
 
+      - name: init Terraform
+        run: |
+          terraform -chdir=terraform init
+        shell: powershell
       # 6️⃣ Apply Terraform
       - name: Apply Terraform
         run: terraform -chdir=terraform apply -auto-approve
