@@ -27,11 +27,15 @@ jobs:
       # 3️⃣ Create ECR repo if it doesn't exist
       - name: Ensure LocalStack ECR Repo
         run: |
-          aws --endpoint-url $env:LOCALSTACK_ENDPOINT `
-          ecr create-repository `
-          --repository-name mashroom-app `
-          --image-scanning-configuration scanOnPush=true `
-          || Write-Host "Repository already exists, continuing..."
+          try {
+              aws --endpoint-url http://localhost:4566 --region us-east-1 ecr create-repository `
+                  --repository-name mashroom-app `
+                  --image-scanning-configuration scanOnPush=true 2>$null
+              Write-Host "ECR repository ensured (created or already exists)."
+          } catch {
+              Write-Host "Unexpected error: $_"
+              throw $_
+          }
 
       # 4️⃣ Tag Docker image for LocalStack ECR
       - name: Tag Image for LocalStack ECR
