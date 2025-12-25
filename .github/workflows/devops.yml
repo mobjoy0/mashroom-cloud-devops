@@ -40,7 +40,7 @@ jobs:
 
       # 6️⃣ Apply Terraform
       - name: Apply Terraform
-        run: terraform -chdir=./terraform apply -auto-approve
+        run: terraform -chdir=terraform apply -auto-approve
         shell: powershell
 
       # 7️⃣ Force ECS to redeploy new image
