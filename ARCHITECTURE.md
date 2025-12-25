@@ -10,7 +10,7 @@ This document outlines the proposed AWS architecture for migrating Mashroom's Ja
 
 ### High-Level Design
 
-
+![image](./images/Diagram.jpg)
 ### Core Components
 
 **Networking:**

@@ -1,0 +1,53 @@
+name: Local DevOps Pipeline
+
+on:
+  push:
+    branches: ["master"]
+
+jobs:
+  build-and-deploy:
+    runs-on: self-hosted
+
+    env:
+      AWS_ACCESS_KEY_ID: test
+      AWS_SECRET_ACCESS_KEY: test
+      AWS_DEFAULT_REGION: us-east-1
+      LOCALSTACK_ENDPOINT: http://localhost:4566
+
+    steps:
+      # 1️⃣ Checkout code
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # 2️⃣ Build Docker image
+      - name: Build Docker Image
+        run: docker build -t mashroom-app .
+
+      # 3️⃣ Create ECR repo if it doesn't exist
+      - name: Ensure LocalStack ECR Repo
+        run: |
+          aws --endpoint-url=$LOCALSTACK_ENDPOINT ecr create-repository \
+            --repository-name mashroom-app \
+            --image-scanning-configuration scanOnPush=true
+
+      # 4️⃣ Tag Docker image for LocalStack ECR
+      - name: Tag Image for LocalStack ECR
+        run: |
+          docker tag mashroom-app 000000000000.dkr.ecr.us-east-1.localhost.localstack.cloud:4566/mashroom-app
+
+      # 5️⃣ Push Docker image to LocalStack ECR
+      - name: Push Image to LocalStack ECR
+        run: |
+          docker push 000000000000.dkr.ecr.us-east-1.localhost.localstack.cloud:4566/mashroom-app
+
+      # 6️⃣ Apply Terraform
+      - name: Apply Terraform
+        run: terraform -chdir=../../terraform apply -auto-approve
+
+      # 7️⃣ Force ECS to redeploy new image
+      - name: Force ECS New Deployment
+        run: |
+          aws --endpoint-url=$LOCALSTACK_ENDPOINT ecs update-service \
+            --cluster mashroom-cluster \
+            --service mashroom-service \
+            --force-new-deployment
